@@ -3,6 +3,7 @@ import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
 import 'package:fluidify_mobile/models/latex_syntax.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/getpoint_page.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
@@ -179,7 +180,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
         log("No prompt found for subChapterId: ${widget.subChapterId}");
       }
     } catch (e) {
-      log("error bang : $e");
+      log("error : $e");
     }
   }
 
@@ -261,6 +262,23 @@ class _FeedbackPageState extends State<FeedbackPage> {
               )
           ],
         ),
+        actions: [
+          IconButton(
+      icon: const Icon(Icons.report_problem_outlined, color: Colors.red),
+      tooltip: 'Laporkan Masalah',
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReportPage(
+              reportedPage: 'Feedback Page',
+              subChapterId: widget.subChapterId,
+            ),
+          ),
+        );
+      },
+    ),
+        ],
       ),
       body: Column(
         children: [

@@ -1,6 +1,7 @@
 import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/getpoint_page.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
@@ -305,8 +306,29 @@ class _MindMapPageState extends State<MindMapPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Colors.white,
+        elevation: 5,
+        shadowColor: Colors.black.withValues(alpha: 0.5),
+        surfaceTintColor: Colors.transparent,
+        title: Text("Pemetaan Konsep", style: fBoldTextStyle.copyWith(fontSize: 20, color: regularBlue)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.report_problem_outlined, color: dangerColor),
+            tooltip: 'Laporkan Masalah',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(
+                    reportedPage: 'Pemetaan Konsep',
+                    subChapterId: widget.subChapterId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         iconTheme: const IconThemeData(color: Colors.grey),
       ),
       backgroundColor: appBackgroundColor,

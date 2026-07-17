@@ -1,4 +1,5 @@
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/models/app_size.dart';
 import 'package:flutter/material.dart';
 
 class FluidyLevelButton extends StatefulWidget {
@@ -37,7 +38,36 @@ class _FluidyLevelButtonState extends State<FluidyLevelButton> {
       color = correctGreen;
       shadowColor = Colors.green[700]!;
     }
-    return GestureDetector(
+
+    String labelText = "";
+    bool isLabelLeft = false;
+    double labelPosition = 1.0; // Default posisi label di sebelah kanan
+    double? labelLeft;
+    double? labelRight;
+
+    if (widget.icon == Icons.play_arrow_rounded) {
+      labelText = "Simulasi";
+      isLabelLeft = true;
+      labelPosition = AppSize.screenWidth(context) * 0.45; // Posisi label Simulasi
+    } else if (widget.icon == Icons.search_rounded) {
+      labelText = "Eksplorasi";
+      isLabelLeft = true;
+      labelPosition = AppSize.screenWidth(context) * 0.60; // Posisi label Eksplorasi
+    } else if (widget.icon == Icons.edit_rounded) {
+      labelText = "Peta Konsep";
+      isLabelLeft = false;
+      labelPosition = 0 - AppSize.screenWidth(context) * 0.20; // Posisi label Peta Konsep
+    } else if (widget.icon == Icons.lightbulb) {
+      labelText = "Umpan Balik";
+      isLabelLeft = false;
+      labelPosition = AppSize.screenWidth(context) * 0.22; // Posisi label Umpan Balik
+    } else if (widget.icon == Icons.question_mark_rounded) {
+      labelText = "Kuis";
+      isLabelLeft = false;
+      labelPosition = 0 - AppSize.screenWidth(context) * 0.08; // Posisi label Kuis
+    }
+
+    Widget button = GestureDetector(
       onTapDown: (_) => setState(() {
         if (widget.state != ButtonStatus.locked) _isPressed = true;
       }),
@@ -94,6 +124,48 @@ class _FluidyLevelButtonState extends State<FluidyLevelButton> {
           ],
         ),
       ),
+    );
+
+    if (labelText.isEmpty) {
+      return button;
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        button,
+        Positioned(
+          right: labelPosition,
+          top: 20,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(12),
+                topRight: const Radius.circular(12),
+                bottomLeft: Radius.circular(isLabelLeft ? 12 : 0), // Membentuk 'ekor' bubble chat
+                bottomRight: Radius.circular(isLabelLeft ? 0 : 12),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              labelText,
+              style: TextStyle(
+                color: widget.state == ButtonStatus.locked ? Colors.grey[400] : Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

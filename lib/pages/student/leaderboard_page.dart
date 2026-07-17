@@ -84,21 +84,21 @@ class _StudentLeaderBoardPageState extends State<StudentLeaderBoardPage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          if (_currentUserData.isNotEmpty) const SizedBox(height: 50),
-          Center(
-            child: _currentUserData.isNotEmpty ? FluidifyToggleSwitch(
-                leftText: "Leaderboard",
-                rightText: "Streak",
-                onChanged: (bool isLeftSelected) {
-                  setState(() {
-                    _isLeaderboardTab = isLeftSelected;
-                  });
-                })
-                : _buildLeaderboardView()
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 50),
+          if (_currentUserData.isNotEmpty)
+            Center(
+              child: FluidifyToggleSwitch(
+                  leftText: "Leaderboard",
+                  rightText: "Streak",
+                  onChanged: (bool isLeftSelected) {
+                    setState(() {
+                      _isLeaderboardTab = isLeftSelected;
+                    });
+                  }),
+            ),
+          if (_currentUserData.isNotEmpty) const SizedBox(height: 20),
           Expanded(
-            child: _isLeaderboardTab ? _buildLeaderboardView() : _buildStreakView(),
+            child: _isLeaderboardTab || _currentUserData.isEmpty ? _buildLeaderboardView() : _buildStreakView(),
           ),
         ],
       ),

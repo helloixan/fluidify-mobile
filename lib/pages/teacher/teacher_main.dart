@@ -3,6 +3,8 @@ import 'package:fluidify_mobile/pages/student/leaderboard_page.dart';
 import 'package:fluidify_mobile/pages/profilepage.dart';
 import 'package:fluidify_mobile/pages/teacher/teacher_dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:fluidify_mobile/services/supabase_service.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 
 class TeacherMainWrapper extends StatefulWidget {
   const TeacherMainWrapper({super.key});
@@ -19,6 +21,19 @@ class _TeacherMainWrapperState extends State<TeacherMainWrapper> {
     const TeacherDashboardPage(),
     const UserProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // _initializeGemini();
+  }
+
+  // Future<void> _initializeGemini() async {
+  //   final apiKey = await SupabaseService().getGeminiApiKey();
+  //   if (apiKey != null && apiKey.isNotEmpty) {
+  //     Gemini.init(apiKey: apiKey);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

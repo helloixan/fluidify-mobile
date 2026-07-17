@@ -22,6 +22,7 @@ class _ChapterFormPageState extends State<ChapterFormPage> {
   TextEditingController _sequenceOrderController = TextEditingController();
   Map<String, dynamic>? _chapter;
   bool isLoading = true;
+  bool _isAuthor = false;
 
   @override
   void initState() {
@@ -32,9 +33,11 @@ class _ChapterFormPageState extends State<ChapterFormPage> {
   Future<void> _getChapter() async {
     try {
       var chapterResponse = await _supabaseService.getChapterById(widget.chapterId);
+      var userId = await _supabaseService.getCurrentUserId();
       if (chapterResponse != null) {
         setState(() {
           _chapter = chapterResponse;
+          _isAuthor = chapterResponse['chapter_author_id'] == userId;
         });
         computeLevels();
       }
@@ -292,11 +295,14 @@ class _ChapterFormPageState extends State<ChapterFormPage> {
                             children: [
                               Text("Urutan Chapter: ${_chapter!['chapter_sequence']}"),
                               Text("Judul Chapter: ${_chapter!['chapter_title']}"),
+                              Text("Dibuat oleh: ${_chapter!['chapter_author_name']}"),
                             ],
                           )
                         ],
                       ),
+                      if (_isAuthor)
                       const SizedBox(height: 10),
+                      if (_isAuthor)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -330,7 +336,7 @@ class _ChapterFormPageState extends State<ChapterFormPage> {
                                           await Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => SubchapterFormPage(subchapter_id: subchapter['subchapter_id']),
+                                              builder: (context) => SubchapterFormPage(subchapter_id: subchapter['subchapter_id'], isAuthor: _isAuthor, chapter_author_name: _chapter!['chapter_author_name']),
                                             ),
                                           );
                                           if (mounted) {

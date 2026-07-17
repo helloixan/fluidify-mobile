@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:fluidify_mobile/components/confirmation_dialog.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
@@ -11,7 +13,9 @@ import 'package:flutter/material.dart';
 
 class SubchapterFormPage extends StatefulWidget {
   final String subchapter_id;
-  const SubchapterFormPage({super.key, required this.subchapter_id});
+  final bool isAuthor;
+  final String chapter_author_name;
+  const SubchapterFormPage({super.key, required this.subchapter_id, required this.isAuthor, required this.chapter_author_name});
 
   @override
   State<SubchapterFormPage> createState() => _SubchapterFormPageState();
@@ -50,11 +54,11 @@ class _SubchapterFormPageState extends State<SubchapterFormPage> {
     if (_subchapter != null) {
       setState(() {
         _subchapter!["levels"] = [
-          {"icon": Icons.play_arrow_rounded, "name": "Video Simulasi", "navigateTo": VideoFormPage(subchapterId: _subchapter!['id'].toString())},
-          {"icon": Icons.search_rounded, "name": "Eksplorasi Materi", "navigateTo": ExplorationMateriForm(subChapterId: _subchapter!['id'].toString())},
-          {"icon": Icons.edit_rounded, "name": "Concept Map", "navigateTo": ConceptMapForm(subChapterId: _subchapter!['id'].toString())},
+          {"icon": Icons.play_arrow_rounded, "name": "Video Simulasi", "navigateTo": VideoFormPage(subchapterId: _subchapter!['id'].toString(), isAuthor: widget.isAuthor)},
+          {"icon": Icons.search_rounded, "name": "Eksplorasi Materi", "navigateTo": ExplorationMateriForm(subChapterId: _subchapter!['id'].toString(), isAuthor: widget.isAuthor)},
+          {"icon": Icons.edit_rounded, "name": "Concept Map", "navigateTo": ConceptMapForm(subChapterId: _subchapter!['id'].toString(), isAuthor: widget.isAuthor)},
           {"icon": Icons.lightbulb, "name": "Feedback", "navigateTo": const FeedbackFormPage()},
-          {"icon": Icons.question_mark_rounded, "name": "Quiz", "navigateTo": QuizForm(subChapterId: _subchapter!['id'].toString(), type: 'ctl')},
+          {"icon": Icons.question_mark_rounded, "name": "Quiz", "navigateTo": QuizForm(subChapterId: _subchapter!['id'].toString(), type: 'ctl', isAuthor: widget.isAuthor)},
         ];
       });
     }
@@ -216,11 +220,15 @@ class _SubchapterFormPageState extends State<SubchapterFormPage> {
                               Text("Urutan Subchapter: ${_subchapter!['sequence_order']}"),
                               const SizedBox(height: 10),
                               Text("Subchapter: ${_subchapter!['title']}"),
+                              const SizedBox(height: 10),
+                              Text("Dibuat oleh: ${widget.chapter_author_name}"),
                             ],
                           ),
                         ],
                       ),
+                      if (widget.isAuthor)
                       const SizedBox(height: 10),
+                      if (widget.isAuthor)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

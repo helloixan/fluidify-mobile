@@ -97,6 +97,21 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child : Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [ 
+                          Text("Halaman ini adalah draft, Jangan lupa klik icon '", style: fBoldTextStyle.copyWith(color: softGray)),
+                          Icon(Icons.save, color: softGray, size: 20),
+                          Text("'", style: fBoldTextStyle.copyWith(color: softGray)),
+                        ]),
+                        Text("untuk menyimpan setiap perubahan yang kamu buat!", style: fBoldTextStyle.copyWith(color: softGray)),
+                    ],
+                  )),
                   const Text("Base Prompt", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 8),
                   Expanded(

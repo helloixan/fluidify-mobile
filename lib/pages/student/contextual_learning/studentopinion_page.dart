@@ -1,6 +1,7 @@
 import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/getpoint_page.dart';
 import 'package:fluidify_mobile/pages/waiting_screen.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
@@ -95,12 +96,36 @@ class _StudentOpinionPageState extends State<StudentOpinionPage> {
           log("Check Response: $response");
           if (response.toLowerCase().contains("ya")) {
             return true;
+          } else {
+            return false;
           }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Fluidy tidak dapat memeriksa jawaban kamu saat ini. Silakan coba lagi nanti."),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return false;
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Fluidy tidak dapat melakukan pengecekan jawaban kamu saat ini. Silakan coba lagi nanti."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
       }
-      return false;
     } catch (e) {
-      log("Error checking student answer: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Fluidy tidak dapat memeriksa jawaban kamu saat ini. Silakan coba lagi nanti."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return false;
     }
   }
@@ -266,7 +291,7 @@ class _StudentOpinionPageState extends State<StudentOpinionPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => GetPointPage(
-                                          title: "Pemetaan Konsep Berhasil Diselesaikan!",
+                                          title: "Simulasi Berhasil Diselesaikan!",
                                           description: "Kamu mendapatkan $gainPoin poin dari menyelesaikan level ini.",
                                           pointsEarned: gainPoin,
                                           currentPoints: widget.currentPoints),
@@ -313,7 +338,29 @@ class _StudentOpinionPageState extends State<StudentOpinionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        elevation: 5,
+        shadowColor: Colors.black.withValues(alpha: 0.5),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: Text("Pertanyaan Pemantik", style: fBoldTextStyle.copyWith(fontSize: 20, color: regularBlue)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.report_problem_outlined, color: dangerColor),
+            tooltip: 'Laporkan Masalah',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(
+                    reportedPage: 'Pertanyaan Pemantik', 
+                    subChapterId: widget.subChapterId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       backgroundColor: appBackgroundColor,
       body: isGettingStudentAnswer

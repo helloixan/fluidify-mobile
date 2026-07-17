@@ -4,6 +4,7 @@ import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
 import 'package:fluidify_mobile/models/chat_messages.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/getpoint_page.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
@@ -189,20 +190,47 @@ class _LearningPageState extends State<LearningPage> {
         nodeData != null && !isTyping ? nodeData['options'] : [];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        foregroundColor: appBackgroundColor,
+        backgroundColor: appBackgroundColor,
         iconTheme: const IconThemeData(color: Colors.grey),
-        title: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: currentProgress,
-            backgroundColor: Colors.grey.shade300,
-            color: Colors.blueAccent,
-            minHeight: 8,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: currentProgress,
+                  backgroundColor: Colors.grey.shade300,
+                  color: Colors.blueAccent,
+                  minHeight: 8,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text("${(currentProgress * 100).toInt()}%", style: fMediumTextStyle.copyWith(color: regularBlue, fontSize: 12))
+          ],
         ),
+        actions: [
+          Text("|", style: fMediumTextStyle.copyWith(color: Colors.grey, fontSize: 24)),
+          IconButton(
+            icon: Icon(Icons.report_problem_outlined, color: dangerColor),
+            tooltip: 'Laporkan Masalah',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(
+                    reportedPage: 'Chatbot Eksplorasi Materi',
+                    subChapterId: widget.subChapterId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

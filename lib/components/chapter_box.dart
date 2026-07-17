@@ -26,7 +26,7 @@ class _ChapterBoxState extends State<ChapterBox> {
       color = correctGreen;
     }
     return Container(
-      height: 80,
+      height: 65,
       width: AppSize.screenWidth(context) - 20,
       decoration: BoxDecoration(
           color: color,

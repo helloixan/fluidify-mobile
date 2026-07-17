@@ -9,11 +9,13 @@ import 'package:fluidify_mobile/models/app_size.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:fluidify_mobile/pages/teacher/preview_pages/preview_simulasi.dart';
 
 class VideoFormPage extends StatefulWidget {
   final String subchapterId;
+  final bool isAuthor;
 
-  const VideoFormPage({super.key, required this.subchapterId});
+  const VideoFormPage({super.key, required this.subchapterId, required this.isAuthor});
 
   @override
   State<VideoFormPage> createState() => _VideoFormPageState();
@@ -392,19 +394,48 @@ class _VideoFormPageState extends State<VideoFormPage> {
                     ),
                   ),
                   if (!isEditing)
-                    FButtonWidget(
-                        icon: Icons.edit,
-                        text: "Edit",
-                        action: () {
-                          setState(() {
-                            isEditing = true;
-                          });
-                        })
+                    Row(
+                      children: [
+                        if (widget.isAuthor)
+                        SizedBox(
+                          width: AppSize.screenWidth(context) * 0.45,
+                          child: FButtonWidget(
+                              icon: Icons.edit,
+                              text: "Edit",
+                              action: () {
+                                setState(() {
+                                  isEditing = true;
+                                });
+                              }),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: widget.isAuthor
+                              ? AppSize.screenWidth(context) * 0.45 : AppSize.screenWidth(context) * 0.9,
+                          child: FButtonWidget(
+                            text: "Pratinjau", 
+                            action: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PreviewSimulasiPage(
+                                    videoUrl: _videoUrlController.text,
+                                    videoPath: _videoFile?.path,
+                                    essentialQuestion: _essentialQuestionController.text,
+                                  ),
+                                ),
+                              );
+                            }, 
+                            icon: Icons.remove_red_eye,
+                          )
+                        )
+                      ],
+                    )
                   else
                     Row(
                       mainAxisAlignment: _video != null ? MainAxisAlignment.spaceBetween : MainAxisAlignment.center,
                       children: [
-                        if (_video != null)
+                        if (_video != null && widget.isAuthor)
                           SizedBox(
                             width: AppSize.screenWidth(context) * 0.45,
                             child: FOutlinedButton(
@@ -417,6 +448,7 @@ class _VideoFormPageState extends State<VideoFormPage> {
                                 }),
                           ),
                         if (_video != null) const SizedBox(width: 10),
+                        if (widget.isAuthor)
                         SizedBox(
                           width: _video != null ? AppSize.screenWidth(context) * 0.45 : AppSize.screenWidth(context) * 0.9,
                           child: FButtonWidget(

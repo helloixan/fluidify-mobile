@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
           e.statusCode == 429) {
         pesanError = 'Terlalu banyak percobaan. Tunggu beberapa saat dan coba lagi.';
       } else {
-        pesanError = "error: ${e.message}";
+        pesanError = "Tidak dapat melakukan login saat ini : ${e.message}";
       }
 
       if (mounted) {

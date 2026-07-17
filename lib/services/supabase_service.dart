@@ -22,14 +22,7 @@ class SupabaseService {
     final user = session?.user;
     return user?.email;
   }
-
-  //get user id
-  String? getCurrentUserId() {
-    final session = _supabase.auth.currentSession;
-    final user = session?.user;
-    return user?.id;
-  }
-
+  
   //get user profile
   Future<Map<String, dynamic>?> getUserProfile() async {
     final user = _supabase.auth.currentUser;
@@ -43,6 +36,14 @@ class SupabaseService {
       return null;
     }
   }
+
+  //get user id
+  String? getCurrentUserId() {
+    final session = _supabase.auth.currentSession;
+    final user = session?.user;
+    return user?.id;
+  }
+
 
   // get user role
   Future<String?> getUserRole() async {
@@ -92,19 +93,33 @@ class SupabaseService {
             subchapter_title:title,
             subchapter_state:state,
             sequence_order,
-            chapter_id:chapters(id),
-            chapter_title:chapters(title),
-            chapter_sequence:chapters(sequence_order)
+            chapters (
+              id,
+              title,
+              sequence_order,
+            created_by
+            )
           ''');
+
+      final profilesResponse = await _supabase.from('profiles').select('id, display_name');
+      final Map<String, String> profileMap = {
+        for (var p in profilesResponse) p['id']: p['display_name'] ?? 'Unknown'
+      };
+
       final Map<String, Map<String, dynamic>> groupedChapters = {};
 
       for (var item in response) {
-        final chapterId = item['chapter_id']['id'];
+        final chapter = item['chapters'];
+        final chapterId = chapter['id'];
+        final createdBy = chapter['created_by'];
+        
         if (!groupedChapters.containsKey(chapterId)) {
           groupedChapters[chapterId] = {
             'chapter_id': chapterId,
-            'chapter_title': item['chapter_title']['title'],
-            'chapter_sequence': item['chapter_sequence']['sequence_order'],
+            'chapter_title': chapter['title'],
+            'chapter_sequence': chapter['sequence_order'],
+            'chapter_author_id': createdBy,
+            'chapter_author_name': profileMap[createdBy] ?? 'Unknown',
             'subchapters': [],
           };
         }
@@ -124,11 +139,14 @@ class SupabaseService {
         final responseChapters = await _supabase.from('chapters').select('*');
         for (var chapter in responseChapters) {
           final chapterId = chapter['id'];
+          final createdBy = chapter['created_by'];
           if (!groupedChapters.containsKey(chapterId)) {
             chapters.add({
               'chapter_id': chapterId,
               'chapter_title': chapter['title'],
               'chapter_sequence': chapter['sequence_order'],
+              'chapter_author_id': createdBy,
+              'chapter_author_name': profileMap[createdBy] ?? 'Unknown',
               'subchapters': [],
             });
           }
@@ -314,6 +332,16 @@ class SupabaseService {
     } catch (e) {
       log('Error fetching student progress: $e');
       return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllStudentProgresses() async {
+    try {
+      final response = await _supabase.from('student_progress').select('user_id, levels_progress');
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      log('Error fetching all student progress: $e');
+      return [];
     }
   }
 
@@ -656,10 +684,17 @@ class SupabaseService {
 
       if (chapter == null) return null;
 
+      final profilesResponse = await _supabase.from('profiles').select('id, display_name');
+      final Map<String, String> profileMap = {
+        for (var p in profilesResponse) p['id']: p['display_name'] ?? 'Unknown'
+      };
+
       final Map<String, dynamic> chapterData = {
         'chapter_id': chapter['id'],
         'chapter_title': chapter['title'],
         'chapter_sequence': chapter['sequence_order'],
+        'chapter_author_id': chapter['created_by'],
+        'chapter_author_name': profileMap[chapter['created_by']] ?? 'Unknown',
         'subchapters': <Map<String, dynamic>>[],
       };
 
@@ -1121,6 +1156,37 @@ class SupabaseService {
     } catch (e) {
       log('[getProfileById] Error fetching profile: $e');
       rethrow;
+    }
+  }
+
+  Future<void> updateTutorialDone(String userId) async {
+    try {
+      await _supabase.from('profiles').update({'tutorial_done': true}).eq('id', userId);
+      log('[updateTutorialDone] Successfully updated tutorial_done to true for user: $userId');
+    } catch (e) {
+      log('[updateTutorialDone] Error updating tutorial_done for user $userId: $e');
+      rethrow;
+    }
+  }
+
+  Future<String?> getGeminiApiKey() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select('api_keys(api_key)')
+          .eq('id', user.id)
+          .single();
+
+      if (response['api_keys'] != null) {
+        return response['api_keys']['api_key'] as String?;
+      }
+      return null;
+    } catch (e) {
+      log('[getGeminiApiKey] Error fetching Gemini API key: $e');
+      return null;
     }
   }
 }

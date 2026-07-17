@@ -21,10 +21,70 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   String? avatarUrl;
   bool isLoading = true;
 
+  int progressPercent = 0;
+  int _averageLevels = 0;
+  int _totalLevels = 0;
+  int _totalStudents = 0;
+
+
   @override
   void initState() {
     fetchProfile();
+    fetchProgressData();
     super.initState();
+  }
+
+  Future<void> fetchProgressData() async {
+    // 1. Get total subchapters
+    int totalSubchapters = 0;
+    final chapters = await _supabaseService.getAllChapters();
+    if (chapters != null) {
+      for (var chapter in chapters) {
+        if (chapter['subchapters'] != null) {
+          totalSubchapters += (chapter['subchapters'] as List).length;
+        }
+      }
+    }
+    
+    int totalLevels = totalSubchapters * 5;
+    if (totalLevels == 0) {
+      if (mounted) setState(() => progressPercent = 0);
+      return;
+    }
+
+    // 2. Get total students
+    final students = await _supabaseService.getAllStudents();
+    if (students == null || students.isEmpty) {
+      if (mounted) setState(() => progressPercent = 0);
+      return;
+    }
+    int totalStudents = students.length;
+
+    // 3. Get all student progress
+    final progresses = await _supabaseService.getAllStudentProgresses();
+    
+    int totalStudentLevels = 0;
+    for (var progress in progresses) {
+      final levelsProgress = progress['levels_progress'] as Map<String, dynamic>?;
+      if (levelsProgress != null) {
+        for (var value in levelsProgress.values) {
+          totalStudentLevels += (value as num).toInt();
+        }
+      }
+    }
+
+    double averageLevels = totalStudentLevels / totalStudents;
+    double progressFraction = averageLevels / totalLevels;
+    log("averageLevels: $averageLevels, totalLevels: $totalLevels, progressFraction: $progressFraction");
+    
+    if (mounted) {
+      setState(() {
+        _averageLevels = averageLevels.toInt();
+        _totalLevels = totalLevels;
+        _totalStudents = totalStudents;
+        progressPercent = (progressFraction * 100).toInt().clamp(0, 100);
+      });
+    }
   }
 
   Future<void> fetchProfile() async {
@@ -118,18 +178,30 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Progress Pembelajaran',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                             Text(
+                                'Progress Pembelajaran',
+                                style: fBoldTextStyle.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Total Siswa: $_totalStudents',
+                            style: const TextStyle(
+                              fontSize: 14,
                               color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Pekan 8/16',
-                            style: TextStyle(
+                          Text(
+                            'Rata-rata Penyelesaian : $_averageLevels level/$_totalLevels total level',
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
                             ),
@@ -137,26 +209,42 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           const SizedBox(height: 16),
 
                           // Custom Progress Bar menggunakan Expanded [cite: 9]
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              height: 12,
-                              color: const Color(0xFFE5E7EB), // Background track
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 50, // Persentase Progress (50%) [cite: 9]
-                                    child: Container(
-                                      color: const Color(0xFFF59E0B),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Container(
+                                    height: 12,
+                                    color: const Color(0xFFE5E7EB), // Background track
+                                    child: Row(
+                                      children: [
+                                        if (progressPercent > 0)
+                                          Expanded(
+                                            flex: progressPercent, // Persentase Progress
+                                            child: Container(
+                                              color: const Color(0xFFF59E0B),
+                                            ),
+                                          ),
+                                        if (100 - progressPercent > 0)
+                                          Expanded(
+                                            flex: 100 - progressPercent, // Sisa bar kosong
+                                            child: const SizedBox(),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                  const Expanded(
-                                    flex: 50, // Sisa bar kosong [cite: 9]
-                                    child: SizedBox(),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Text(
+                                '$progressPercent%',
+                                style: fBoldTextStyle.copyWith(
+                                  fontSize: 14,
+                                  color: const Color(0xFFF59E0B),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

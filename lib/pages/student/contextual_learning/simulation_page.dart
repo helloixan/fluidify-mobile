@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/contextual_learning/studentopinion_page.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
@@ -132,8 +133,26 @@ class _SimulationPageState extends State<SimulationPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text("Simulasi",
-            style: fHeading3TextStyle.copyWith(color: Colors.white)),
+        title: Text("Video Simulasi",
+            style: fHeading2TextStyle.copyWith(color: regularBlue)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.report_problem_outlined, color: dangerColor),
+            tooltip: 'Laporkan Masalah',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(
+                    reportedPage: 'Video Simulasi', 
+                    subChapterId: widget.subChapterId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

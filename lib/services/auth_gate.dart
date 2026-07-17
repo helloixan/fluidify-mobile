@@ -18,6 +18,7 @@ class AuthGate extends StatelessWidget {
           // loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
+              backgroundColor: appBackgroundColor,
               body: Center(
                 child: CircularProgressIndicator(color: regularBlue),
               ),
@@ -32,6 +33,7 @@ class AuthGate extends StatelessWidget {
               builder: (context, roleSnapshot) {
                 if (roleSnapshot.connectionState == ConnectionState.waiting) {
                   return const Scaffold(
+                    backgroundColor: appBackgroundColor,
                     body: Center(
                       child: CircularProgressIndicator(color: regularBlue),
                     ),
@@ -40,6 +42,7 @@ class AuthGate extends StatelessWidget {
 
                 if (roleSnapshot.hasError) {
                   return Scaffold(
+                    backgroundColor: appBackgroundColor,
                     body: Center(
                       child: Text('Terjadi kesalahan saat memuat data: ${roleSnapshot.error}'),
                     ),
@@ -53,6 +56,7 @@ class AuthGate extends StatelessWidget {
                   return const TeacherMainWrapper();
                 } else {
                   return const Scaffold(
+                    backgroundColor: appBackgroundColor,
                     body: Center(
                       child: Text('Akses ditolak: Role tidak valid atau tidak ditemukan.'),
                     ),

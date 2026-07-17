@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// API KEYS
-const SUPABASE_API_KEY =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqc2lheXhhZWNpYWZhZHhxZGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTcwODUsImV4cCI6MjA4NzU5MzA4NX0.yIjQXb4_vizxU-QeMTu5lHKSkLy2VEHQVlCUiW39naE';
-const SUPABASE_URL = 'https://fjsiayxaeciafadxqdlw.supabase.co';
-const GEMINI_API_KEY = 'AIzaSyAUOOid0EirrUhxOa3mbquTFpC3zHspbPg';
-const dummyAvatarUrl = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png";
-
 // colors
 const lightBlue = Color(0xFF03A9F4);
 const regularBlue = Color(0xFF039BE5);

@@ -2,14 +2,17 @@ import 'package:fluidify_mobile/components/confirmation_dialog.dart';
 import 'package:fluidify_mobile/components/fluidy_button.dart';
 import 'package:fluidify_mobile/components/fluidy_outlinebutton.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/models/app_size.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fluidify_mobile/pages/teacher/preview_pages/preview_quiz.dart';
 
 class QuizForm extends StatefulWidget {
   final String subChapterId;
   final String type;
+  final bool isAuthor;
 
-  const QuizForm({super.key, required this.subChapterId, required this.type});
+  const QuizForm({super.key, required this.subChapterId, required this.type, required this.isAuthor});
 
   @override
   State<QuizForm> createState() => _QuizFormState();
@@ -168,15 +171,32 @@ class _QuizFormState extends State<QuizForm> {
         shadowColor: Colors.black.withValues(alpha: 0.5),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        actions: [
+        actions: widget.isAuthor
+            ? [
           IconButton(icon: const Icon(Icons.save, color: regularBlue), onPressed: _saveAll),
-        ],
+        ] : null,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: regularBlue))
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (widget.isAuthor)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+                  child : Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [ 
+                          Text("Halaman ini adalah draft, Jangan lupa klik icon '", style: fBoldTextStyle.copyWith(color: softGray)),
+                          Icon(Icons.save, color: softGray, size: 20),
+                          Text("'", style: fBoldTextStyle.copyWith(color: softGray)),
+                        ]),
+                        Text("untuk menyimpan setiap perubahan yang kamu buat!", style: fBoldTextStyle.copyWith(color: softGray)),
+                    ],
+                  )),
                 if (widget.subChapterId == "" && widget.type == "latihan_soal")
                   Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
@@ -214,6 +234,7 @@ class _QuizFormState extends State<QuizForm> {
                   padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
                   child: TextField(
                     controller: _titleCtrl,
+                    enabled: widget.isAuthor,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       filled: true,
@@ -221,6 +242,10 @@ class _QuizFormState extends State<QuizForm> {
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: regularBlue)),
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+                  child: Text("Daftar Pertanyaan", style: fHeading3TextStyle.copyWith(color: Colors.black)),
                 ),
                 Expanded(
                   child: _questions.isEmpty
@@ -237,7 +262,8 @@ class _QuizFormState extends State<QuizForm> {
                               child: ListTile(
                                 title: Text(q['pertanyaan'] ?? 'Tanpa Pertanyaan', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
                                 subtitle: Text("Jawaban Benar: ${q['jawaban_benar']}"),
-                                trailing: Row(
+                                trailing: widget.isAuthor
+                                    ? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
@@ -249,21 +275,48 @@ class _QuizFormState extends State<QuizForm> {
                                       onPressed: () => _deleteQuestion(index),
                                     ),
                                   ],
-                                ),
+                                ) : const SizedBox(
+                                  width: 30,
+                                  height: 30,)
                               ),
                             );
                           },
                         ),
                 ),
+                Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (widget.isAuthor)
+                            SizedBox(
+                              width: AppSize.screenWidth(context) * 0.5,
+                              child: FButtonWidget(text: "Tambah Pertanyaan", action: _openQuestionEditor, icon: Icons.add,)
+                            ),
+                          SizedBox(
+                            width: widget.isAuthor
+                                ? AppSize.screenWidth(context) * 0.4 : AppSize.screenWidth(context) * 0.9,
+                            child: FButtonWidget(
+                              text: "Pratinjau", 
+                              action: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PreviewQuiz(
+                                      title: _titleCtrl.text,
+                                      questions: _questions,
+                                    ),
+                                  ),
+                                );
+                              }, 
+                              icon: Icons.remove_red_eye,
+                            )
+                          )
+                        ],
+                      ),
+                    ),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openQuestionEditor(),
-        icon: const Icon(Icons.add),
-        label: const Text("Tambah Soal"),
-        backgroundColor: regularBlue,
-        foregroundColor: Colors.white,
-      ),
     );
   }
 }
@@ -398,7 +451,7 @@ class _QuestionEditorScreenState extends State<QuestionEditorScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 2,
         actions: [
-          IconButton(icon: const Icon(Icons.check, color: regularBlue), onPressed: _save),
+          IconButton(icon: const Icon(Icons.save, color: regularBlue), onPressed: _save),
         ],
       ),
       body: ListView(

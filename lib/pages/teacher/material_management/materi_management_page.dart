@@ -16,7 +16,9 @@ class _MateriManagementPageState extends State<MateriManagementPage> {
   SupabaseService _supabaseService = SupabaseService();
   final TextEditingController _chapterTitleController = TextEditingController();
   final TextEditingController _chapterSequenceController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> chapters = [];
+  List<Map<String, dynamic>> filteredChapters = [];
   bool isLoading = true;
 
   @override
@@ -24,17 +26,39 @@ class _MateriManagementPageState extends State<MateriManagementPage> {
     super.initState();
     computeChapters();
   }
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> computeChapters() async {
     var data = await _supabaseService.getAllChapters();
     if (data != null) {
       setState(() {
         chapters = data;
+        _filterChapters(_searchController.text);
       });
     }
     setState(() {
       isLoading = false;
     });
+  }
+
+  void _filterChapters(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        filteredChapters = List.from(chapters);
+      });
+    } else {
+      setState(() {
+        filteredChapters = chapters.where((chapter) {
+          final title = chapter['chapter_title']?.toString().toLowerCase() ?? '';
+          return title.contains(query.toLowerCase());
+        }).toList();
+      });
+    }
   }
 
   Future<void> _addChapter() async {
@@ -138,8 +162,29 @@ class _MateriManagementPageState extends State<MateriManagementPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
-            child: FluidywithBubble(maskotPath: 'assets/img/fluidy_reading.png', text: 'Berikut adalah daftar chapter yang ada saat ini'),
+            padding: EdgeInsets.only(top: 20, left: 10, right: 10),
+            child: FluidywithBubble(maskotPath: 'assets/img/fluidy_reading.png', text: 'Berikut adalah daftar chapter yang ada saat ini', maskotSize: 60,),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _filterChapters,
+              decoration: InputDecoration(
+                hintText: "Cari judul chapter...",
+                prefixIcon: const Icon(Icons.search, color: regularBlue),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: regularBlue),
+                ),
+              ),
+            ),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -148,9 +193,10 @@ class _MateriManagementPageState extends State<MateriManagementPage> {
                   ListView.builder(
                       shrinkWrap: true,
                       padding: EdgeInsets.only(bottom: 0),
-                      itemCount: chapters.length,
+                      itemCount: filteredChapters.length,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        var chapter = chapters[index];
+                        var chapter = filteredChapters[index];
                         return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: Card(
@@ -171,11 +217,18 @@ class _MateriManagementPageState extends State<MateriManagementPage> {
                                     }
                                   },
                                   leading: Text(chapter['chapter_sequence'].toString(), style: fHeading1TextStyle.copyWith(color: regularBlue)),
-                                  title: Text(chapter['chapter_title']),
-                                  subtitle: Text("Terdapat ${chapter['subchapters'].length} subchapter"),
+                                  title: Text(chapter['chapter_title'], style: fBoldTextStyle,),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text("Terdapat ${chapter['subchapters'].length} subchapter"),
+                                      Text("Dibuat oleh: ${chapter['chapter_author_name']}"),
+                                    ],
+                                  ),
                                 )));
                       }),
-                      Padding(
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: SizedBox(
                       width: double.infinity,

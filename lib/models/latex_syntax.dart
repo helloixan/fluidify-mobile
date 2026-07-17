@@ -3,7 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:markdown/markdown.dart' as md;
 
-// 1. Syntax Parser
+// Syntax Parser
 class LatexSyntax extends md.InlineSyntax {
   LatexSyntax() : super(r'(\$\$?)([\s\S]+?)\1');
 
@@ -12,10 +12,8 @@ class LatexSyntax extends md.InlineSyntax {
     final isDisplay = match[1] == '\$\$';
     final latexCode = match[2];
 
-    // PERUBAHAN 1: Gunakan 'empty' agar flutter_markdown tidak merender teks mentahnya
     final element = md.Element.empty('span');
     element.attributes['display'] = isDisplay.toString();
-    // Simpan kode latex-nya di dalam atribut
     element.attributes['content'] = latexCode ?? '';
 
     parser.addNode(element);
@@ -23,7 +21,7 @@ class LatexSyntax extends md.InlineSyntax {
   }
 }
 
-// 2. Element Builder
+// Element Builder
 class LatexBuilder extends MarkdownElementBuilder {
   @override
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
@@ -35,7 +33,6 @@ class LatexBuilder extends MarkdownElementBuilder {
       text = text.replaceAll('\n', ' ').trim();
     }
 
-    // Buat widget Math murni
     Widget mathWidget = Math.tex(
       text,
       mathStyle: isDisplay ? MathStyle.display : MathStyle.text,

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:fluidify_mobile/components/fluidy_bubble.dart';
 import 'package:fluidify_mobile/const/fluidy_const.dart';
+import 'package:fluidify_mobile/pages/report_page.dart';
 import 'package:fluidify_mobile/pages/student/getpoint_page.dart';
 import 'package:fluidify_mobile/services/supabase_service.dart';
 import 'package:flutter/material.dart';
@@ -298,6 +299,7 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
+        backgroundColor: appBackgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           _isReviewMode ? "Ulasan Selesai" : "Luar Biasa! 🎉",
@@ -393,6 +395,23 @@ class _QuizPageState extends State<QuizPage> {
           shadowColor: Colors.black.withValues(alpha: 0.5),
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
+          actions: [
+          IconButton(
+            icon: Icon(Icons.report_problem_outlined, color: dangerColor),
+            tooltip: 'Laporkan Masalah',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(
+                    reportedPage: 'Kuis',
+                    subChapterId: widget.subChapterId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         ),
         body: _isLoading || _isSubmitting
             ? Center(
@@ -461,11 +480,9 @@ class _QuizPageState extends State<QuizPage> {
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 200,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-                ),
+                errorBuilder: (context, error, stackTrace) => SizedBox(
+                  height: 150,
+                  child: Center(child: Text(currentQ['alt_media'] != null && currentQ['alt_media'].isNotEmpty ? "{alt: ${currentQ['alt_media']}}" : "Gagal memuat gambar", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[600])))),
               ),
             ),
           const SizedBox(height: 20),
